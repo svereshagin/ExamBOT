@@ -1,7 +1,4 @@
 import time
-
-from aiogram import F
-
 from app.bot_instance import dp, bot
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.filters import CommandStart, Command
@@ -12,7 +9,7 @@ async def command_start_handler(message: Message) -> None:
     for i in range(15):
         await message.reply(f"turn{i}")
         time.sleep(10)
-
+from app.src.Exam.exam_logic import ExamLogic
 
 
 
@@ -45,15 +42,15 @@ async def command_docs(message: Message) -> None:
     его функциями из .yml файла
     """
     await message.answer('231')
-locations = {}
 
-@dp.message(F.location)
-async def location_handler(message: Message):
-    latitude = message.location.latitude
-    longitude = message.location.longitude
-    locations['latitude'] = latitude
-    locations['longitude'] = longitude
-    await message.answer(f'{locations["latitude"]}, {locations["longitude"]}')
+
+@dp.message_handler(commands=['start_timer'])
+async def start_timer(message: Message):
+    chat_id = message.chat.id
+    seconds = 10  # Задай нужное количество секунд
+    asyncio.create_task(countdown_timer_bot(chat_id, seconds))
+    await message.answer("Таймер запущен!")
+
 
 
 async def main() -> None:

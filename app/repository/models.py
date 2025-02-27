@@ -17,8 +17,8 @@ class Student(Base):
 
 
 class Exam(Base):
-    mark: Mapped[str] = mapped_column(INT)
-    turn: Mapped[str] = mapped_column(INT)
+    mark: Mapped[int] = mapped_column(INT, default=0)
+    turn: Mapped[int] = mapped_column(INT)
     examination_paper: Mapped[int] = mapped_column(INT) #номер экзаменационного билета
     tasks: Mapped[str] = mapped_column(TEXT) #задания с этого билета
     student_id: Mapped[int] = mapped_column(
