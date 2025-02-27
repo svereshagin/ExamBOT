@@ -1,8 +1,8 @@
-from typing import List, Any, Coroutine
+from typing import Any
 from sqlalchemy import ScalarResult
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.repository.models import Student, Exam
-from app.repository.database import connection
+from src.repository.models import Student, Exam
+from src.repository.database import connection
 
 
 class StudentExam:

@@ -2,7 +2,7 @@ from datetime import datetime
 from sqlalchemy import Integer, func
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, AsyncAttrs, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, declared_attr
-from app.settings import settings
+from src.settings import settings
 
 engine = create_async_engine(url=settings.DATABASE_URL, echo=True)
 async_session_maker = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)

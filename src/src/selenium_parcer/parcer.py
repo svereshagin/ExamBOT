@@ -1,8 +1,8 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from app.src.selenium_parcer.selenium_instance import driver
-from app.settings import settings
+from src.src.selenium_parcer.selenium_instance import driver
+from src.settings import settings
 
 group = 1
 

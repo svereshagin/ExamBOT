@@ -1,17 +1,17 @@
 services:
-#
-#  postgres:
-#    image: postgres:14.2-alpine
-#    env_file: .env
-#    ports:
-#      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
-#    healthcheck:
-#      test: [ "CMD-SHELL", "pg_isready" ]
-#      interval: 10s
-#      timeout: 5s
-#      retries: 20
 
-  app:
+  postgres:
+    image: postgres:14.2-alpine
+    env_file: .env
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  tg_bot:
     container_name: telegram_bot
     build:
       context: .
@@ -20,6 +20,13 @@ services:
       - .:/app
     command: python3 -m app.main
     env_file: .env
-#    depends_on:
-#      postgres:
-#        condition: service_healthy
+    depends_on:
+      postgres:
+        condition: service_healthy
+  app:
+    container_name: fast_api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app

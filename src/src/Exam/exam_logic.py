@@ -1,12 +1,5 @@
-import aiogram
-import schedule
-import time
-from app.repository.models import Student, Exam
-import asyncio
-import aioschedule as schedule
 import time
 from time_constants import *
-from app.bot_instance import bot
 from aiogram import Bot
 
 

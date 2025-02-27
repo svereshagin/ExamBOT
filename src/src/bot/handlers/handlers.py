@@ -1,6 +1,6 @@
 import time
-from app.bot_instance import dp, bot
-from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
+from src.bot_instance import dp, bot
+from aiogram.types import Message
 from aiogram.filters import CommandStart, Command
 
 @dp.message(CommandStart())
@@ -9,7 +9,7 @@ async def command_start_handler(message: Message) -> None:
     for i in range(15):
         await message.reply(f"turn{i}")
         time.sleep(10)
-from app.src.Exam.exam_logic import ExamLogic
+from src.src.Exam.exam_logic import ExamLogic
 
 
 

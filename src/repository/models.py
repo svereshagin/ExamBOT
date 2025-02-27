@@ -1,9 +1,6 @@
 from sqlalchemy import VARCHAR, ForeignKey, INT, TEXT
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from app.repository.database import Base
-from typing_extensions import Annotated
-from pydantic import BaseModel, StringConstraints, validator, ValidationError
-
+from src.repository.database import Base
 
 
 class Student(Base):

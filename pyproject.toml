@@ -19,6 +19,8 @@ webdriver-manager = "^4.0.2"
 aiogram = "^3.18.0"
 aioschedule = "^0.5.2"
 schedule = "^1.2.2"
+fastapi = "^0.115.9"
+uvicorn = "^0.34.0"
 
 
 [tool.poetry.group.dev.dependencies]
