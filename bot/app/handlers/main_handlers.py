@@ -1,5 +1,9 @@
 from aiogram.types import Message
+from pydantic.v1.class_validators import all_kwargs
+from sqlalchemy import ScalarResult
+
 from bot.app.config import settings
+from bot.app.services.report import make_resulted_report, make_telegram_report
 from bot.app.services.selenium_parser.parcer import get_students_from_site
 from bot.app.repositories.models import Student
 from bot.app.services.Exam.form_questions import form_questions
@@ -47,16 +51,41 @@ async def command_start_exam(message: Message) -> None:
 async def command_students(message: Message) -> None:
     """Отсылает ведомость по ученикам:
     подключается к БД, берёт данные из неё
-    отсылает в виде ученик : оценка
+    отсылает в виде:
+        surname: asda
+        mark: 0
+        turn: 0
+        examination_paper: 1
 
     также стоит настроить на клв сдавших на 5/4/3 и не сдавших для ведомостей.
     """
-    pass
+
+    data = await student_exams.get_report()
+    data = make_telegram_report(make_resulted_report(data))
+    for elem in data:
+        await message.answer(elem)
+
+
+
 
 
 async def command_docs(message: Message) -> None:
-    """Отсылает документацию по работе с ботом:
+    """
+    Отсылает документацию по работе с ботом:
     его функциями из .yml файла
     """
-    await message.answer('231')
-
+    await message.answer(
+        "В начале подготовьте вашего бота к использованию\n"
+        "Передайте параметры в .env файл\n"
+        "Запустите docker-compose.yml через make build сбилдит\n"
+        "Далее make up для поднятия контейнеров\n"
+        "Если необходимо, то сделайте alembic revision, команда доступна в makefile\n"
+        "alembic_revision\n"
+        "alembic_upgrade\n"
+        "Если проблемы, то возможно, стоит сменить в .env файле host на localhost,\n"
+        "сделать миграции и затем поменять обратно"
+    )
+    await message.answer(
+        "При старте нажмите на prepare_exam и подождите парсинга и формирования данных в таблицах\n"
+        "Далее нажмите на start_exam и выберите мод работы из стандартного или ваш"
+    )
