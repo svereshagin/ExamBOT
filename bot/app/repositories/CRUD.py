@@ -1,8 +1,10 @@
-from typing import Any
+from typing import Any, List
 from sqlalchemy import ScalarResult
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.repository.models import Student, Exam
-from src.repository.database import connection
+from bot.app.repositories.models import Student, Exam
+from bot.app.repositories.database import connection
+
+from bot.app.services.Exam.form_questions import FormExam, form_questions
 
 
 class StudentExam:
@@ -20,28 +22,77 @@ class StudentExam:
     async def get_all_students(cls, session: AsyncSession) -> ScalarResult[Any]:
         return await session.scalars(Student)
 
-    @classmethod
     @connection
-    async def insert_students(
-        cls,
-        users: list,
-        turn: int,
-        examination_paper: int,
-        tasks: list,
-        session: AsyncSession,
-    ):
-        for user in users:
-            new_user: Student = Student(surname=user)
-            exam: Exam = Exam(
-                turn=turn,
-                examination_paper=examination_paper,
-                tasks="\n".join(tasks),
-                student_id=new_user.id,
-            )
-            session.add(new_user)
-            session.add(exam)
-            await session.commit()
+    async def create_students(cls, session: AsyncSession, students: List[str], form_exams: List[FormExam]) -> dict:
+        print("create_students")
+        try:
+            for idx, student_name in enumerate(students):
+                if idx >= len(form_exams):
+                    break  # Если студентов больше, чем экзаменов
+
+                new_student = Student(surname=student_name)
+                session.add(new_student)
+                await session.flush()  # Обновляем сессию, чтобы получить ID нового студента
+
+                exam = Exam(
+                    turn=form_exams[idx].turn,
+                    examination_paper=form_exams[idx].examination_paper,
+                    tasks="\n".join(form_exams[idx].tasks),
+                    student_id=new_student.id,  # Теперь ID доступен
+                )
+                session.add(exam)
+            print("create_students2")
+            await session.commit()  # Коммитим все изменения сразу
             return {"success": True}
+        except Exception as e:
+            await session.rollback()  # Откатить изменения в случае ошибки
+            return {"success": False, "error": str(e)}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# import asyncio
+#
+# students = ['adad', 'asda', 'asda12']
+# form_questions.students = students
+# form_exams = form_questions.form_groups()
+# print(form_exams)
+#
+# s = StudentExam()
+#
+# async def call():
+#     res = await s.create_students(students=students, form_exams=form_exams)
+#     return res
+#
+# # Запускаем асинхронную функцию
+# async def main():
+#     res1 = await call()
+#     print(res1)
+#
+# # Запускаем основной асинхронный контекст
+# if __name__ == "__main__":
+#     asyncio.run(main())
+# Сохраняем все изменения в базе данных
+
+    # Пример использования
+    # Предположим, у нас есть сессия SQLAlchemy и студент
 
         #     async def register_user(cls, telegram_id: int, name: str, language: str, username: str, password: str,
 
@@ -120,4 +171,4 @@ class StudentExam:
 #
 #         return profiles  # Возвращаем список профилей с учетными данными
 
-registration = StudentExam()
+student_exams = StudentExam()

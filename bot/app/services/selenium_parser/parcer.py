@@ -4,6 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from bot.app.services.selenium_parser.selenium_instance import driver
 from bot.app.config import settings
 from bot.app.services.selenium_parser.utils import get_links
+
 group = 1
 
 print(settings)

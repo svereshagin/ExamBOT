@@ -23,6 +23,7 @@ fastapi = "^0.115.9"
 uvicorn = "^0.34.0"
 chromedriver-binary = "^135.0.7039.0.0"
 pyyaml = "^6.0.2"
+alembic = "^1.14.1"
 
 
 [tool.poetry.group.dev.dependencies]

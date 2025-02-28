@@ -1,7 +1,10 @@
 from aiogram.types import Message
-from aiogram.filters import CommandStart, Command
 from bot.app.config import settings
-from bot.app.services.selenium_parser.parcer import run_registration
+from bot.app.services.selenium_parser.parcer import get_students_from_site
+from bot.app.repositories.models import Student
+from bot.app.services.Exam.form_questions import form_questions
+from bot.app.repositories.CRUD import student_exams
+
 
 
 async def command_start_handler(message: Message) -> None:
@@ -14,8 +17,21 @@ async def command_start_handler(message: Message) -> None:
 
 async def command_prepare_exam(message: Message) -> None:
     """начало парсинга команда для бизнес логики"""
-    res = run_registration()
-    await message.answer('true')
+    try:
+        await message.answer('Начало парсинга сайта')
+        students = get_students_from_site()
+        await message.answer('Операция совершенна успешно')
+        await message.answer("Общее количество студентов: "+str(len(students)))
+        form_questions.students = students
+        form_exams = form_questions.form_groups()
+        try:
+            await student_exams.create_students(students=students,form_exams=form_exams)
+        except Exception as e:
+            print(e)
+    except Exception as e:
+        await message.answer('Ошибка')
+        await message.answer(str(e))
+
 
 
 
@@ -26,6 +42,7 @@ async def command_start_exam(message: Message) -> None:
     активирует таймер через класс, msg должен перехватывать мод для
     таймера
     """
+
 
 async def command_students(message: Message) -> None:
     """Отсылает ведомость по ученикам:

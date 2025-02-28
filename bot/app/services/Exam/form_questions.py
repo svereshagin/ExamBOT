@@ -1,9 +1,34 @@
+from typing import Counter, List
+
 import yaml
 import pathlib
 import random
+from pydantic import BaseModel
+from random import shuffle
 
+class FormExam(BaseModel):
+    mark: int = 0
+    turn: int = 0
+    examination_paper: int = 0
+    tasks: list = []
 
 class FormQuestions:
+    """
+         Инициализирует экземпляр класса FormQuestions.
+
+        Usage:
+            form_questions(students) - сеттер для получения списка студентов
+            exam = form_questions.form_groups() - формирование обьектов состоящих из данных о студентах
+        Args:
+             number_of_students (int): Количество студентов, для которых будут созданы экзаменационные листы.
+                 Например:
+                    >>> form_questions(students)
+                    >>> exam = form_questions.form_groups()
+
+
+         Raises:
+             ValueError: Если number_of_students меньше 1.
+         """
     __base_file = (
         pathlib.Path(__file__)
         .resolve()
@@ -11,15 +36,12 @@ class FormQuestions:
         .joinpath("yml_files")
         .joinpath("questions.yml")
     )
+    def __init__(self):
+        self.__data = self.__get_content()
+        self.__students: list = []
+        print(self.__data)
 
-    def __init__(self, number_of_students: int):
-        self.data = self.get_content()
-        self.number_of_exam_papers: int = len(self.data)
-        self.already_used = []
-        self.number_of_students = number_of_students
-        self.exam_papers = self.generate_exam_papers()
-
-    def get_content(self) -> list:
+    def __get_content(self) -> list:
         """Returns a list of questions out of yml_files/questions.yml"""
         try:
             with open(self.__base_file, "r", encoding="UTF-8") as file:
@@ -32,31 +54,43 @@ class FormQuestions:
             print(f"Error parsing YAML file: {e}")
             return []
 
-    def __randomize_exam_paper_per_student(self) -> int:
-        """Return a randomized exam paper number, if already used"""
-        if len(self.already_used) >= self.number_of_exam_papers:
-            return random.choice(self.already_used)
+    @property
+    def students(self):
+        return self.__students
 
-        while True:
-            salt = random.randint(1, self.number_of_exam_papers)
-            if salt not in self.already_used:
-                self.already_used.append(salt)
-                return salt
+    @students.setter
+    def students(self, students):
+        if students and isinstance(students, list):
+            shuffle(students)
+            self.__students = students
+        else:
+            raise TypeError("students must be a list and must not be empty")
 
-    def __form_exam_questions(self) -> list:
-        """Form exam questions based on a randomized number"""
-        return self.data[f"num{self.__randomize_exam_paper_per_student()}"]
+    def form_groups(self) -> List[FormExam]:
+        """Формирует группы студентов и создает экземпляры FormExam"""
+        exams = []
+        used_questions = set()  # Хранит использованные вопросы
 
-    def generate_exam_papers(self) -> dict:
-        """Generate exam papers for each student"""
-        return {f"student_{i + 1}": self.__form_exam_questions() for i in range(self.number_of_students)}
+        for counter, student in enumerate(self.__students):
+            # Получаем все доступные вопросы, исключая уже использованные
+            available_questions = [q for q in self.__data.keys() if q not in used_questions]
 
-    def get_exam_papers(self) -> dict[str, list]:
-        """Return the generated exam papers """
-        return self.exam_papers
+            if not available_questions:
+                #print("Недостаточно вопросов для всех студентов. Повторное использование вопросов.")
+                available_questions = list(self.__data.keys())  # Если вопросов недостаточно, берем все
+
+            # Рандомим вопросы для студента
+            selected_question = random.choice(available_questions)
+            used_questions.add(selected_question)  # Добавляем вопрос в использованные
+
+            # Создаем экземпляр FormExam для студента
+            exam = FormExam(turn=counter, examination_paper=selected_question, tasks=self.__data[selected_question])
+            exams.append(exam)
+
+        return exams
 
 
-# Example usage
-number_of_students = 5  # Specify the number of students
-s = FormQuestions(number_of_students)
-#print(s.get_exam_papers())
+
+
+
+form_questions = FormQuestions()

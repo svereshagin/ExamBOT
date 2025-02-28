@@ -83,6 +83,14 @@ compile_translator_es:
 collect_text:
 	xgettext --from-code=UTF-8 -o src/middleware/locales/messages.pot src/app/text_vars_handlers_.py
 
+alembic_revision:
+	alembic revision --autogenerate -m "Init migration"
+
+alembic_upgrade:
+	alembic upgrade head
+
+alembic_downgrade:
+	alembic downgrade
 help_tran:
 	@echo "Usage: make [command]"
 	@echo "Commands:"
