@@ -1,7 +1,7 @@
 services:
 
   postgres:
-    image: postgres:14.2-alpine
+    image: postgres:latest
     env_file: .env
     ports:
       - "${POSTGRES_PORT}:${POSTGRES_PORT}"
@@ -13,20 +13,28 @@ services:
 
   tg_bot:
     container_name: telegram_bot
+    env_file: .env
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: ./bot/Dockerfile
     volumes:
-      - .:/app
-    command: python3 -m app.main
-    env_file: .env
+      - ./bot:/project/code/bot
+    command: python bot/app/main.py
     depends_on:
       postgres:
         condition: service_healthy
+
   app:
-    container_name: fast_api
+    container_name: web_app
+    env_file: .env
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: ./web/Dockerfile
     volumes:
-      - .:/app
+      - ./web/app:/app
+    ports:
+      - "${FASTAPI_PORT}:${FASTAPI_PORT}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: uvicorn web.app.main:app --host 0.0.0.0 --port 8080 --reload
