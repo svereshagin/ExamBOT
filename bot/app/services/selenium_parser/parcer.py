@@ -4,10 +4,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 from bot.app.services.selenium_parser.selenium_instance import driver
 from bot.app.config import settings
 from bot.app.services.selenium_parser.utils import get_links
+from bot.app.logger.logger_file import logger
 
-group = 1
 
-print(settings)
+group: int = 1
+logger.info(msg=settings)
 
 
 def get_all_students(wait) -> list:
@@ -24,10 +25,11 @@ def get_all_students(wait) -> list:
             student = student[: student.find("\n")]  # только фамилии
             all_students.append(student)
             students.write(student + "\n")
+            logger.info(f'Добавлен студент: {student}')  # Логируем добавление студента
     group += 1
+    logger.info(
+        f'Обработана группа: {group - 1}, общее количество студентов: {len(all_students)}')  # Логируем информацию о группе
     return all_students
-
-    # print(div.text)  # Печатаем текст внутри div
 
 
 def get_students_from_site() -> list:
@@ -37,31 +39,33 @@ def get_students_from_site() -> list:
     """
     links = get_links()
     try:
+        logger.info('Начало процесса получения студентов с сайта.')
         driver.get(settings.MFUA)
         driver.implicitly_wait(10)
-        wait = WebDriverWait(
-            driver, 10
-        )  # Можно заменить на более динамическое ожидание
+
+        logger.info('Ввод логина.')
         login_input = driver.find_element(By.NAME, "USER_LOGIN")
         login_input.send_keys(settings.LOGIN)
 
-        login_button = driver.find_element(
-            By.XPATH, "//button[contains(text(), 'Войти')]"
-        )
+        logger.info('Нажатие кнопки "Войти".')
+        login_button = driver.find_element(By.XPATH, "//button[contains(text(), 'Войти')]")
         login_button.click()
 
         driver.implicitly_wait(10)
-        password_button = wait.until(
+        logger.info('Ожидание кнопки для ввода пароля.')
+        password_button = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.ID, "FormsAuthentication"))
         )
         password_button.click()
 
-        print("Кнопка 'Вход с помощью пароля' нажата")
+        logger.info("Кнопка 'Вход с помощью пароля' нажата.")
 
         driver.implicitly_wait(10)
+        logger.info('Ввод пароля.')
         password_input = driver.find_element(By.ID, "passwordInput")
         password_input.send_keys(settings.PASSWORD)
 
+        logger.info('Нажатие кнопки "Отправить".')
         submit_button = driver.find_element(By.ID, "submitButton")
         submit_button.click()
 
@@ -70,12 +74,13 @@ def get_students_from_site() -> list:
 
         # Сохранение cookies после полной авторизации
         cookies = driver.get_cookies()
-        print("Сохраненные cookies:", cookies)
+        logger.info("Сохраненные cookies получены.")
 
         # Переход на страницу с классом студентов
         driver.delete_all_cookies()
         students = []
         for link in links:
+            logger.info(f'Переход на страницу: {link}')
             driver.get(link)
 
             # Устанавливаем сохраненные cookies
@@ -87,10 +92,14 @@ def get_students_from_site() -> list:
             wait = WebDriverWait(driver, 10)
 
             students_row = get_all_students(wait)
-            for student in students_row:
-                students.append(student)
+            students.extend(students_row)
 
-            print("round " + str(group))
+            logger.info(f'Обработан раунд {group - 1}, добавлено студентов: {len(students_row)}')
+
+        logger.info(f'Общее количество студентов, полученных с сайта: {len(students)}')
         return students
+    except Exception as e:
+        logger.error(f'Ошибка при получении студентов: {e}')
     finally:
+        logger.info('Закрытие драйвера.')
         driver.quit()

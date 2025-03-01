@@ -1,4 +1,4 @@
-from typing import Any, List, Dict, Sequence
+from typing import Any, List, Dict, Sequence, Union
 from sqlalchemy import ScalarResult, Row
 from sqlalchemy.ext.asyncio import AsyncSession
 from bot.app.repositories.models import Student, Exam
@@ -35,6 +35,7 @@ class StudentExam:
         print(type)# Получаем все пары (студент, экзамен)
         return student_exam_pairs
 
+    @classmethod
     @connection
     async def create_students(cls, session: AsyncSession, students: List[str], form_exams: List[FormExam]) -> dict:
         print("create_students")
@@ -61,12 +62,27 @@ class StudentExam:
             await session.rollback()  # Откатить изменения в случае ошибки
             return {"success": False, "error": str(e)}
 
-
-
+    @classmethod
+    @connection
+    async def get_all_students(cls, session: AsyncSession) -> Union[List[Student], dict]:
+        """
+        Возвращает список обьектов класса Student, либо возвращает словарь с ошибкой
+        """
+        try:
+            stmt = select(Student)
+            result = await session.execute(stmt)
+            student_exam_pairs = result.scalars().all()  # Извлекаем только объекты Student
+            list_of_students = []
+            for student in student_exam_pairs:
+                list_of_students.append(student)
+            return student_exam_pairs
+        except Exception as e:
+            await session.rollback()
+            return {"success": False, "error": str(e)}
 
 
 # import asyncio
-
+#
 # students = ['adad', 'asda', 'asda12']
 # form_questions.students = students
 # form_exams = form_questions.form_groups()
@@ -76,12 +92,16 @@ class StudentExam:
 #
 # async def call():
 #     # res = await s.create_students(students=students, form_exams=form_exams)
-#     R = await s.get_report()
-#     from bot.app.services.report import make_resulted_report, make_telegram_report
-#     R = make_resulted_report(R)
-#     R = make_telegram_report(R)
-#     for i in R:
-#         print(i)
+#     # R = await s.get_report()
+#     # from bot.app.services.report import make_resulted_report, make_telegram_report
+#     # R = make_resulted_report(R)
+#     # R = make_telegram_report(R)
+#     # for i in R:
+#     #     print(i)
+#     r1 = await s.get_all_students()
+#     print(r1)
+#     for i in r1:
+#         print(i.surname)
 #
 # # Запускаем асинхронную функцию
 # async def main():
