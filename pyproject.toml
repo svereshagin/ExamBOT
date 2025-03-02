@@ -5,8 +5,10 @@ description = ""
 authors = ["amadeo <risefenixpuryfire@gmail.com>"]
 readme = "README.md"
 
+
+
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.10"
 sqlalchemy = "^2.0.38"
 greenlet = "^3.1.1"
 asyncpg = "^0.30.0"
@@ -15,7 +17,19 @@ pydantic = "^2.10.6"
 pydantic-settings = "^2.8.0"
 webdriver-manager = "^4.0.2"
 aiogram = "^3.18.0"
+aioschedule = "^0.5.2"
+schedule = "^1.2.2"
+fastapi = "^0.115.9"
+uvicorn = "^0.34.0"
+chromedriver-binary = "^135.0.7039.0.0"
+pyyaml = "^6.0.2"
+alembic = "^1.14.1"
 
+
+[tool.poetry.group.dev.dependencies]
+black = "^25.1.0"
+pytest = "^8.3.4"
+pytest-asyncio = "^0.25.3"
 
 [build-system]
 requires = ["poetry-core"]

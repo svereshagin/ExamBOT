@@ -1,25 +1,41 @@
 services:
-#
-#  postgres:
-#    image: postgres:14.2-alpine
-#    env_file: .env
-#    ports:
-#      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
-#    healthcheck:
-#      test: [ "CMD-SHELL", "pg_isready" ]
-#      interval: 10s
-#      timeout: 5s
-#      retries: 20
 
-  app:
+  postgres:
+    container_name: postgres
+    image: postgres:latest
+    env_file: .env
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  tg_bot:
     container_name: telegram_bot
+    env_file: .env
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: ./bot/Dockerfile
     volumes:
-      - .:/app
-    command: python3 -m app.main
+      - ./bot:/project/code/bot
+    command: python bot/app/main.py
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  app:
+    container_name: web_app
     env_file: .env
-#    depends_on:
-#      postgres:
-#        condition: service_healthy
+    build:
+      context: .
+      dockerfile: ./web/Dockerfile
+    volumes:
+      - ./web/app:/app
+    ports:
+      - "${FASTAPI_PORT}:${FASTAPI_PORT}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: uvicorn web.app.main:app --host 0.0.0.0 --port 8080 --reload
