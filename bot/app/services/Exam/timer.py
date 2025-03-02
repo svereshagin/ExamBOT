@@ -1,6 +1,3 @@
-
-
-
 from bot.app.repositories.CRUD import student_exams
 from typing import Optional, Tuple, List
 
