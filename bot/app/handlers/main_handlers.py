@@ -5,7 +5,7 @@ from bot.app.services.selenium_parser.parcer import get_students_from_site
 from bot.app.services.Exam.form_questions import form_questions, FormExam
 from bot.app.repositories.CRUD import student_exams
 from bot.app.logger.logger_file import logger
-
+from bot.app.handlers.main_handler_text_files import CMD_START_HANDLER_TEXT, CMD_DOCS_HANDLER_TEXT
 
 
 
@@ -13,10 +13,7 @@ async def command_start_handler(message: Message) -> None:
     """Returns True if the bot is running else False."""
     logger.info('command_start_handler activated')
     await message.answer(f"Hello! ExamBot version {settings.VERSION}")
-    await message.answer(f"Run /command_prepare_exam to get the students out of API cite\n"
-                         f"Don't forget to insert your credentials into .env file\n"
-                         f"And provide links into bot/yml_files/links in .yml format"
-                         f"Good luck with the exam")
+    await message.answer(CMD_START_HANDLER_TEXT)
 
 
 async def command_prepare_exam(message: Message) -> None:
@@ -24,17 +21,12 @@ async def command_prepare_exam(message: Message) -> None:
     try:
         logger.info('command_prepare_exam activated')
         await message.answer('Начало парсинга сайта')
-
-        # Логирование входящего сообщения
         logger.info(f'Получено сообщение: {message.text} от пользователя: {message.from_user.id}')
-
         students: list = get_students_from_site()
         logger.info(f'Успешно получено {len(students)} студентов из сайта.')
-
-        await message.answer('Операция совершена успешно')
+        await message.answer('Парсинг прошёл успешно')
         logger.info('Парсинг прошёл успешно')
         await message.answer("Общее количество студентов: " + str(len(students)))
-
         form_questions.students = students
         form_exams: list[FormExam] = form_questions.form_groups()
         logger.info('command_prepare_exam: Функция form_groups() создала необходимые обьекты для работы с БД.')
@@ -59,9 +51,10 @@ async def command_students(message: Message) -> None:
         turn: 0
         examination_paper: 1
 
-    также стоит настроить на клв сдавших на 5/4/3 и не сдавших для ведомостей.
     """
-
+    #TODO выводить в другом формате: либо через возможность листания на одном окошке либо
+    #TODO через нынешний вывод но в конце нужно вывести также ведомость по сдавшим отдельно
+    #
     data = await student_exams.get_report()
     data = make_telegram_report(make_resulted_report(data))
     for elem in data:
@@ -77,17 +70,7 @@ async def command_docs(message: Message) -> None:
     Отсылает документацию по работе с ботом:
     его функциями из .yml файла
     """
-    await message.answer(
-        "В начале подготовьте вашего бота к использованию\n"
-        "Передайте параметры в .env файл\n"
-        "Запустите docker-compose.yml через make build сбилдит\n"
-        "Далее make up для поднятия контейнеров\n"
-        "Если необходимо, то сделайте alembic revision, команда доступна в makefile\n"
-        "alembic_revision\n"
-        "alembic_upgrade\n"
-        "Если проблемы, то возможно, стоит сменить в .env файле host на localhost,\n"
-        "сделать миграции и затем поменять обратно"
-    )
+    await message.answer(CMD_DOCS_HANDLER_TEXT)
     await message.answer(
         "При старте нажмите на prepare_exam и подождите парсинга и формирования данных в таблицах\n"
         "Далее нажмите на start_exam и выберите мод работы из стандартного или ваш"

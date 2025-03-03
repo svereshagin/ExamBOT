@@ -1,5 +1,5 @@
 from typing import Any, List, Dict, Sequence, Union
-from sqlalchemy import ScalarResult, Row
+from sqlalchemy import ScalarResult, Row, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from bot.app.repositories.models import Student, Exam
 from bot.app.repositories.database import connection
@@ -80,7 +80,12 @@ class StudentExam:
             await session.rollback()
             return {"success": False, "error": str(e)}
 
-
+    @classmethod
+    @connection
+    async def delete_all_students(cls, session: AsyncSession) -> Union[None, dict]:
+        # try:
+        #     stmt = delete(Student).whe
+        pass
 # import asyncio
 #
 # students = ['adad', 'asda', 'asda12']

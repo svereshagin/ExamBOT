@@ -9,6 +9,7 @@ from aiogram.types import Message
 from bot.app.logger.logger_file import logger
 from bot.app.repositories.models import Student
 from bot.app.services.Exam.timer import ExamTimerPreparations
+from bot.app.handlers.timer_handler_text import  cmd_router_start_exam_text
 
 active_timers = {}
 student_skip_event = {}
@@ -16,6 +17,7 @@ router = Router()
 
 
 class TimerState(StatesGroup):
+    waiting_for_exam = State()
     waiting_for_time = State()
     exam_in_progress = State()
 
@@ -28,14 +30,7 @@ def log_and_respond(message: Message, text: str):
 @router.message(F.text == "/start_exam")
 async def command_start_timer(message: Message, state: FSMContext):
     """Запуск режима экзамена"""
-    text = (
-        "Возможные режимы работы:\n"
-        "1. Ввод времени на подготовку (в минутах) и общего времени экзамена.\n"
-        "2. Ввод времени на подготовку (в минутах) и времени на одного студента.\n"
-        "Пример 1: 10 90 - где 10 минут на подготовку и 90 минут на экзамен.\n"
-        "Пример 2: 0 5 - где 0 минут на подготовку и 5 минут на одного студента."
-    )
-    await log_and_respond(message, text)
+    await log_and_respond(message, cmd_router_start_exam_text)
     await message.answer("⏳ Введите параметры таймера (например, '10 90'):")
     await state.set_state(TimerState.waiting_for_time)
 
