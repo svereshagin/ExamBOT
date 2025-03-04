@@ -9,7 +9,7 @@ from aiogram.types import Message
 from bot.app.logger.logger_file import logger
 from bot.app.repositories.models import Student
 from bot.app.services.Exam.timer import ExamTimerPreparations
-from bot.app.handlers.timer_handler_text import  cmd_router_start_exam_text
+from bot.app.handlers.text_for_handlers.timer_handler_text import  cmd_router_start_exam_text
 
 active_timers = {}
 student_skip_event = {}

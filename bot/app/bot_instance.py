@@ -1,30 +1,32 @@
+
 from aiogram import Bot, Dispatcher, F
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from bot.app.config import settings
-from bot.app.handlers.main_handlers import (
-    command_start_handler,
-    command_prepare_exam,
-    command_students,
-    command_docs,
-)
+# from bot.app.handlers.main_handlers import (
+#     # command_start_handler,
+#     command_prepare_exam,
+#     command_students,
+#     command_docs,
+# )
 from aiogram.filters import CommandStart, Command
 from aiogram.types import BotCommand
 from bot.app.handlers.timer_handler import command_start_timer, set_timer, command_stop_timer, TimerState
 from bot.app.handlers.timer_handler import router
+from bot.app.handlers.main_handlers import router as main_router
 
 TOKEN = settings.TOKEN
 
 dp = Dispatcher()
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
-dp.message.register(command_start_handler, CommandStart())
-dp.message.register(command_prepare_exam, Command("prepare_exam"))
-# dp.message.register(command_start_exam, Command("command_start_exam"))
-dp.message.register(command_students, Command("students"))
-dp.message.register(command_docs, Command("docs"))
+# dp.message.register(command_start_handler, CommandStart())
+# dp.message.register(command_prepare_exam, Command("prepare_exam"))
+# # dp.message.register(command_start_exam, Command("command_start_exam"))
+# dp.message.register(command_students, Command("students"))
+# dp.message.register(command_docs, Command("docs"))
 
-
+dp.include_routers(main_router)
 dp.include_router(router)
 async def set_default_commands(bot: Bot):
     commands = [
@@ -55,4 +57,5 @@ dp.message.register(command_stop_timer, Command("skip"))
 # добавить установку меню бота
 
 
-__all__ = ["bot"]
+__all__ = ["bot", "dp"]
+

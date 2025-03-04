@@ -1,16 +1,28 @@
-from aiogram.types import Message
+from aiogram import F, Router
+from aiogram.filters import CommandStart
+from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
+
 from bot.app.config import settings
 from bot.app.services.report import make_resulted_report, make_telegram_report
 from bot.app.services.selenium_parser.parcer import get_students_from_site
 from bot.app.services.Exam.form_questions import form_questions, FormExam
 from bot.app.repositories.CRUD import student_exams
 from bot.app.logger.logger_file import logger
-from bot.app.handlers.main_handler_text_files import CMD_START_HANDLER_TEXT, CMD_DOCS_HANDLER_TEXT
+from bot.app.handlers.text_for_handlers.main_handler_text_files import CMD_START_HANDLER_TEXT, CMD_DOCS_HANDLER_TEXT
+from bot.app.keyboards.keyboards_builder import KeyboardBuilder
+router = Router()
+keyboard = KeyboardBuilder()
 
 
-
+@router.message(CommandStart())
 async def command_start_handler(message: Message) -> None:
     """Returns True if the bot is running else False."""
+
+    """Отправляет клавиатуру при старте."""
+    await message.answer(
+        text="Выберите действие:",
+        reply_markup=keyboard.get_keyboard(mode=("startup_keyboard", "buttons"))
+    )
     logger.info('command_start_handler activated')
     await message.answer(f"Hello! ExamBot version {settings.VERSION}")
     await message.answer(CMD_START_HANDLER_TEXT)
