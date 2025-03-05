@@ -1,9 +1,9 @@
-#command_start_handler
+# command_start_handler
 CMD_START_HANDLER_TEXT = """Run /command_prepare_exam to get the students out of API cite
                             Don't forget to insert your credentials into .env file
                             And provide links into bot/yml_files/links in .yml format
                             Good luck with the exam"""
-#функция
+# функция
 # command_docs
 CMD_DOCS_HANDLER_TEXT = """В начале подготовьте вашего бота к использованию
 Передайте параметры в .env файл

@@ -6,29 +6,32 @@ import random
 from pydantic import BaseModel
 from random import shuffle
 
+
 class FormExam(BaseModel):
     mark: int = 0
     turn: int = 0
     examination_paper: int = 0
     tasks: list = []
 
+
 class FormQuestions:
     """
-         Инициализирует экземпляр класса FormQuestions.
+     Инициализирует экземпляр класса FormQuestions.
 
-        Usage:
-            form_questions(students) - сеттер для получения списка студентов
-            exam = form_questions.form_groups() - формирование обьектов состоящих из данных о студентах
-        Args:
-             number_of_students (int): Количество студентов, для которых будут созданы экзаменационные листы.
-                 Например:
-                    >>> form_questions(students)
-                    >>> exam = form_questions.form_groups()
+    Usage:
+        form_questions(students) - сеттер для получения списка студентов
+        exam = form_questions.form_groups() - формирование обьектов состоящих из данных о студентах
+    Args:
+         number_of_students (int): Количество студентов, для которых будут созданы экзаменационные листы.
+             Например:
+                >>> form_questions(students)
+                >>> exam = form_questions.form_groups()
 
 
-         Raises:
-             ValueError: Если number_of_students меньше 1.
-         """
+     Raises:
+         ValueError: Если number_of_students меньше 1.
+    """
+
     __base_file = (
         pathlib.Path(__file__)
         .resolve()
@@ -36,6 +39,7 @@ class FormQuestions:
         .joinpath("yml_files")
         .joinpath("questions.yml")
     )
+
     def __init__(self):
         self.__data = self.__get_content()
         self.__students: list = []
@@ -73,24 +77,29 @@ class FormQuestions:
 
         for counter, student in enumerate(self.__students):
             # Получаем все доступные вопросы, исключая уже использованные
-            available_questions = [q for q in self.__data.keys() if q not in used_questions]
+            available_questions = [
+                q for q in self.__data.keys() if q not in used_questions
+            ]
 
             if not available_questions:
-                #print("Недостаточно вопросов для всех студентов. Повторное использование вопросов.")
-                available_questions = list(self.__data.keys())  # Если вопросов недостаточно, берем все
+                # print("Недостаточно вопросов для всех студентов. Повторное использование вопросов.")
+                available_questions = list(
+                    self.__data.keys()
+                )  # Если вопросов недостаточно, берем все
 
             # Рандомим вопросы для студента
             selected_question = random.choice(available_questions)
             used_questions.add(selected_question)  # Добавляем вопрос в использованные
 
             # Создаем экземпляр FormExam для студента
-            exam = FormExam(turn=counter, examination_paper=selected_question, tasks=self.__data[selected_question])
+            exam = FormExam(
+                turn=counter,
+                examination_paper=selected_question,
+                tasks=self.__data[selected_question],
+            )
             exams.append(exam)
 
         return exams
-
-
-
 
 
 form_questions = FormQuestions()

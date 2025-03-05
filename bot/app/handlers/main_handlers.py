@@ -1,90 +1,26 @@
-from aiogram import F, Router
+from aiogram import Router
 from aiogram.filters import CommandStart
-from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.fsm.context import FSMContext
+from aiogram.types import (
+    Message,
+)
 
 from bot.app.config import settings
-from bot.app.services.report import make_resulted_report, make_telegram_report
-from bot.app.services.selenium_parser.parcer import get_students_from_site
-from bot.app.services.Exam.form_questions import form_questions, FormExam
-from bot.app.repositories.CRUD import student_exams
+from bot.app.text_for_handlers.main_handler_text_files import (
+    CMD_START_HANDLER_TEXT,
+)
 from bot.app.logger.logger_file import logger
-from bot.app.handlers.text_for_handlers.main_handler_text_files import CMD_START_HANDLER_TEXT, CMD_DOCS_HANDLER_TEXT
-from bot.app.keyboards.keyboards_builder import KeyboardBuilder
-router = Router()
-keyboard = KeyboardBuilder()
+from bot.app.keyboards.Keyboard_Manager import Menu
 
 
-@router.message(CommandStart())
+startup_router = Router()
+
+
+# Обработчик команды /start
+@startup_router.message(CommandStart())
 async def command_start_handler(message: Message) -> None:
-    """Returns True if the bot is running else False."""
-
-    """Отправляет клавиатуру при старте."""
-    await message.answer(
-        text="Выберите действие:",
-        reply_markup=keyboard.get_keyboard(mode=("startup_keyboard", "buttons"))
-    )
-    logger.info('command_start_handler activated')
+    await message.answer("Как подавать котлеты?", reply_markup=Menu.reply_menu)
+    await message.answer("lower keyboard", reply_markup=Menu.inline_menu)
+    logger.info("command_start_handler activated")
     await message.answer(f"Hello! ExamBot version {settings.VERSION}")
     await message.answer(CMD_START_HANDLER_TEXT)
-
-
-async def command_prepare_exam(message: Message) -> None:
-    """начало парсинга команда для бизнес логики"""
-    try:
-        logger.info('command_prepare_exam activated')
-        await message.answer('Начало парсинга сайта')
-        logger.info(f'Получено сообщение: {message.text} от пользователя: {message.from_user.id}')
-        students: list = get_students_from_site()
-        logger.info(f'Успешно получено {len(students)} студентов из сайта.')
-        await message.answer('Парсинг прошёл успешно')
-        logger.info('Парсинг прошёл успешно')
-        await message.answer("Общее количество студентов: " + str(len(students)))
-        form_questions.students = students
-        form_exams: list[FormExam] = form_questions.form_groups()
-        logger.info('command_prepare_exam: Функция form_groups() создала необходимые обьекты для работы с БД.')
-
-        try:
-            logger.info(f'Вызов функции create_students с {len(students)} студентами и {len(form_exams)} экзаменами.')
-            await student_exams.create_students(students=students, form_exams=form_exams)
-            logger.info('command_prepare_exam: Функция create_students выполнена успешно, студенты добавлены в БД')
-        except Exception as e:
-            await message.answer("Произошла ошибка при попытке добавления в БД")
-            logger.error('command_prepare_exam, при попытке отправки в базу групп студентов, %s', e)
-    except Exception as e:
-        logger.error('Проблема при операциях: парсинг, либо формировании questions: %s', e)
-        await message.answer('Проблема при операциях: парсинг сайта. Проверьте доступность сервера/данных входа/переданных ссылок')
-
-async def command_students(message: Message) -> None:
-    """Отсылает ведомость по ученикам:
-    подключается к БД, берёт данные из неё
-    отсылает в виде:
-        surname: asda
-        mark: 0
-        turn: 0
-        examination_paper: 1
-
-    """
-    #TODO выводить в другом формате: либо через возможность листания на одном окошке либо
-    #TODO через нынешний вывод но в конце нужно вывести также ведомость по сдавшим отдельно
-    #
-    data = await student_exams.get_report()
-    data = make_telegram_report(make_resulted_report(data))
-    for elem in data:
-        await message.answer(elem)
-    logger.info('command_students activated')
-
-
-
-
-
-async def command_docs(message: Message) -> None:
-    """
-    Отсылает документацию по работе с ботом:
-    его функциями из .yml файла
-    """
-    await message.answer(CMD_DOCS_HANDLER_TEXT)
-    await message.answer(
-        "При старте нажмите на prepare_exam и подождите парсинга и формирования данных в таблицах\n"
-        "Далее нажмите на start_exam и выберите мод работы из стандартного или ваш"
-    )
-    logger.info('command_docs activated')

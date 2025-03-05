@@ -5,7 +5,9 @@ from sqlalchemy import Row
 from bot.app.repositories.models import Student, Exam
 
 
-def make_resulted_report(student_exam_pairs: Sequence[Row[tuple[Student, Exam]]] | None):
+def make_resulted_report(
+    student_exam_pairs: Sequence[Row[tuple[Student, Exam]]] | None,
+):
     """
     Возвращает список словарей типа
     {'surname': 'Жуков', 'mark': 0, 'turn': 21, 'examination_paper': 2}
@@ -19,16 +21,19 @@ def make_resulted_report(student_exam_pairs: Sequence[Row[tuple[Student, Exam]]]
     student_info = []
 
     for student, exam in student_exam_pairs:
-        student_info.append({
-            "surname": student.surname,
-            "mark": exam.mark,
-            "turn": exam.turn,
-            "examination_paper": exam.examination_paper  # Номер экзаменационного билета
-        })
+        student_info.append(
+            {
+                "surname": student.surname,
+                "mark": exam.mark,
+                "turn": exam.turn,
+                "examination_paper": exam.examination_paper,  # Номер экзаменационного билета
+            }
+        )
 
     return student_info
 
-def make_telegram_report(students: list[dict[str,int,int,int]]):
+
+def make_telegram_report(students: list[dict[str, int, int, int]]):
     """
     R = await s.get_report()
     R = make_resulted_report(R)
