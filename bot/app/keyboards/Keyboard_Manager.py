@@ -22,6 +22,7 @@ class MainKeyboardManager:
         self.__data_low_kb: list = self.__read_yml_main_menu("low")
         self.__data_high_kb: dict[list] = self.__read_yml_main_menu("high")
         self.__button_stop: dict[list] = self.__read_yml_main_menu("stop")
+        self.__button_menu: dict[list] = self.__read_yml_main_menu("menu")
 
     def __read_yml_main_menu(self, mode):
         """Читает YAML и загружает данные."""
@@ -55,6 +56,17 @@ class MainKeyboardManager:
         ]
         return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
+
+    def __make_inline_menu_chooser(self):
+        keyboard = [
+            [InlineKeyboardButton(text=text, callback_data=callback)]
+            for text, callback in zip(
+                self.__button_menu["text"], self.__button_menu["callback_queries"]
+            )
+        ]
+        return InlineKeyboardMarkup(inline_keyboard=keyboard)
+
+
     @property
     def reply_menu(self) -> ReplyKeyboardMarkup:
         """Геттер для нижней клавиатуры."""
@@ -68,7 +80,12 @@ class MainKeyboardManager:
     @property
     def inline_stop_button(self) -> InlineKeyboardMarkup:
         """Геттер для остановки ввода с клавиатуры"""
-        return self.__make_inline_stop_keyboard()  # Исправлено
+        return self.__make_inline_stop_keyboard()
+
+    @property
+    def inline_menu_button(self) -> InlineKeyboardMarkup:
+        """Геттер для выбора главного меню с клавиатуры"""
+        return self.__make_inline_menu_chooser()
 
 
 Menu = MainKeyboardManager()

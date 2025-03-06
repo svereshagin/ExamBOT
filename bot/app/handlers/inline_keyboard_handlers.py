@@ -25,11 +25,6 @@ async def process_prep_exam(message: Message, state: FSMContext) -> None:
     await message.answer("Введите логин")
 
 
-@router.message(F.text == "Запустить экзамен")
-async def process_start_exam(message: Message) -> None:
-    await message.answer("Экзамен начался!")
-
-
 @router.message(F.text == "Получить ведомости")
 async def process_get_reports(message: Message) -> None:
     await message.answer("Загрузка ведомостей...")

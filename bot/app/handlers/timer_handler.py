@@ -4,7 +4,7 @@ from typing import List
 from aiogram import Bot, Router, F
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 
 from bot.app.logger.logger_file import logger
 from bot.app.repositories.models import Student
@@ -29,12 +29,22 @@ def log_and_respond(message: Message, text: str):
     return message.answer(text)
 
 
-@router.message(F.text == "/start_exam")
+@router.callback_query(F.data.in_(['start_exam']))
+async def command_start_timer(callback: CallbackQuery, state: FSMContext):
+    """Запуск режима экзамена (по инлайн-кнопке)"""
+    await callback.answer()
+    await callback.message.answer("⏳ Введите параметры таймера (например, '10 90'):")
+    await state.set_state(TimerState.waiting_for_time)
+
+
+
+@router.message(F.text.in_(["Запустить экзамен", "/start_exam"]))
 async def command_start_timer(message: Message, state: FSMContext):
     """Запуск режима экзамена"""
     await log_and_respond(message, cmd_router_start_exam_text)
     await message.answer("⏳ Введите параметры таймера (например, '10 90'):")
     await state.set_state(TimerState.waiting_for_time)
+
 
 
 @router.message(TimerState.waiting_for_time)

@@ -28,3 +28,9 @@ stop:
     - стоп
   callback_queries:
     - stop
+
+menu:
+  text:
+    - перейти в главное меню
+  callback_queries:
+    - menu

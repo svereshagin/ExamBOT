@@ -14,10 +14,10 @@ from bot.app.handlers.timer_handler import (
 )
 from bot.app.handlers.timer_handler import router
 from bot.app.handlers.main_handlers import startup_router as main_router
-from bot.app.keyboards.inline_keyboard_handlers import (
+from bot.app.handlers.inline_keyboard_handlers import (
     router as inline_kb_router,
 )
-from bot.app.keyboards.under_keyboard_handler import router as under_kb_router
+from bot.app.handlers.under_keyboard_handler import router as under_kb_router
 from bot.app.handlers.data_collector_handler import router as data_collector_router
 
 TOKEN = settings.TOKEN
@@ -35,7 +35,7 @@ dp.include_router(data_collector_router)
 
 async def set_default_commands(bot: Bot):
     commands = [
-        BotCommand(command="start", description="Запустить бота"),
+        BotCommand(command="menu", description="Показать главное меню"),
         BotCommand(
             command="prepare_exam",
             description="Подготовить экзамен, запуск перед командой /start_exam "

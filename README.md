@@ -147,3 +147,4 @@ And provide links into bot/yml_files/links in .yml formatGood luck with the exam
 
 # */docs*
 возвращает полную документацию по работе с ботом
+по
