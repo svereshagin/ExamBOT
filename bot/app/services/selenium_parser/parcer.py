@@ -115,4 +115,3 @@ def get_students_from_site(user_data: tuple) -> list:
         logger.error(f"Ошибка при получении студентов: {e}")
     finally:
         logger.info("Закрытие драйвера.")
-        driver.quit()

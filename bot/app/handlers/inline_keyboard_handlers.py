@@ -37,7 +37,8 @@ async def process_get_reports(message: Message) -> None:
 
 @router.message(F.text == "Очистить БД")
 async def process_clear_db(message: Message) -> None:
-    await message.answer("База данных очищена!")
+    result = await student_exams.delete_all_students_for_teacher_by_telegram_id(telegram_id=message.from_user.id)
+    await message.answer(f"{result['success']}\n{result['message']}")
 
 
 @router.message(F.text == "Выключить клавиатуру")

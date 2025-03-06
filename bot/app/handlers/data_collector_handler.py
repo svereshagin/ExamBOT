@@ -71,7 +71,7 @@ async def process_links(message: Message, state: FSMContext) -> None:
 
 @router.callback_query(lambda c: c.data == "stop")
 async def stop_links(callback_query: types.CallbackQuery, state: FSMContext):
-    await callback_query.answer("Вы завершили ввод ссылок.")
+    await callback_query.answer("Обработка запроса...")  # Ответить на callback-запрос
 
     user_data: dict[str, Any] = await state.get_data()
     links = user_data.get("links", [])
@@ -92,5 +92,6 @@ async def stop_links(callback_query: types.CallbackQuery, state: FSMContext):
         )
         asyncio.create_task(delete_message_later(response))
 
-    await parsing_logic(callback_query.message, user_data)
+    # Запуск длительной операции в фоновом режиме
+    asyncio.create_task(parsing_logic(callback_query.message, user_data))
     await state.clear()
