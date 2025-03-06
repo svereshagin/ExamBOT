@@ -42,3 +42,5 @@ def connection(method):
                 await session.close()  # Закрываем сессию
 
     return wrapper
+
+

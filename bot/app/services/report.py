@@ -1,7 +1,10 @@
+import asyncio
 from typing import Sequence
 
 from sqlalchemy import Row
 
+from bot.app.logger.logger_file import logger
+from bot.app.repositories.CRUD import student_exams
 from bot.app.repositories.models import Student, Exam
 
 
@@ -19,7 +22,9 @@ def make_resulted_report(
             print(i)
     """
     student_info = []
-
+    logger.debug("make_resulted_report")
+    logger.info(f'{student_exam_pairs}')
+     # print(student_exam_pairs)
     for student, exam in student_exam_pairs:
         student_info.append(
             {
@@ -51,3 +56,12 @@ def make_telegram_report(students: list[dict[str, int, int, int]]):
         list_of_str_students.append(str_student)
     print(list_of_str_students)
     return list_of_str_students
+
+
+# async def main():
+#     data = await student_exams.get_report(telegram_id=7084142136)
+#     formatted_data = make_telegram_report(make_resulted_report(data))
+# if __name__ == '__main__':
+#     asyncio.run(main())
+
+

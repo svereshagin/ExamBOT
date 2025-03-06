@@ -28,9 +28,21 @@ async def process_prep_exam(message: Message, state: FSMContext) -> None:
 @router.message(F.text == "Получить ведомости")
 async def process_get_reports(message: Message) -> None:
     await message.answer("Загрузка ведомостей...")
-    data = await student_exams.get_report()
+
+    # Логируем telegram_id
+    logger.info(f"Запрос отчета для telegram_id: {message.from_user.id}")
+    telegram_id = int(message.from_user.id)
+    data = await student_exams.get_report(telegram_id=telegram_id )
+
+    # Проверяем, что данные не равны None
+    if data is None:
+        await message.answer("Нет данных для отображения.")
+        logger.warning(f"Нет данных для telegram_id: {message.from_user.id}")
+        return
+
     formatted_data = make_telegram_report(make_resulted_report(data))
     logger.info("process_get_reports")
+
     for elem in formatted_data:
         await message.answer(elem)
 

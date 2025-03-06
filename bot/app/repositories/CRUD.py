@@ -1,3 +1,4 @@
+import asyncio
 from typing import List, Sequence, Union
 from sqlalchemy import  Row
 
@@ -208,3 +209,15 @@ class StudentExam:
 
 
 student_exams = StudentExam()
+
+
+# async def main():
+#     # await get_teacher(tg_id=7084142136)
+#     res = await student_exams.get_report(telegram_id=7084142136)
+#     print(res)
+#
+#
+#
+#
+# if __name__ == '__main__':
+#     asyncio.run(main())
