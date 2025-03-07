@@ -7,7 +7,7 @@ from sqlalchemy import pool
 from bot.app.config import settings
 sys.path.insert(0, dirname(dirname(dirname(abspath(__file__)))))
 from bot.app.repositories.database import Base
-from bot.app.repositories.models import Student, Exam, Teacher
+from bot.app.repositories.models import Teacher, Student, Exam
 from alembic import context
 
 # this is the Alembic Config object, which provides

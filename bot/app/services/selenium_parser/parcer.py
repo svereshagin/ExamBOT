@@ -3,12 +3,10 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from bot.app.services.selenium_parser.selenium_instance import driver
 from bot.app.config import settings
-from bot.app.services.selenium_parser.utils import get_links
 from bot.app.logger.logger_file import logger
 
 
 group: int = 1
-logger.info(msg=settings)
 
 
 def get_all_students(wait) -> list:
@@ -87,7 +85,7 @@ def get_students_from_site(user_data: tuple) -> list:
         logger.info("Сохраненные cookies получены.")
 
         # Переход на страницу с классом студентов
-        driver.delete_all_cookies()
+
         students = []
         links: list = user_data[2]
         for link in links:
@@ -115,3 +113,4 @@ def get_students_from_site(user_data: tuple) -> list:
         logger.error(f"Ошибка при получении студентов: {e}")
     finally:
         logger.info("Закрытие драйвера.")
+        driver.delete_all_cookies()

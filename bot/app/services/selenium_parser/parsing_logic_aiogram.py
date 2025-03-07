@@ -15,21 +15,18 @@ async def fetch_students(user_data: Tuple) -> list:
     return await asyncio.to_thread(get_students_from_site, user_data)
 
 
-async def add_teacher_to_db(message) -> None:
-    """Функция для добавления учителя в БД."""
-    logger.info("Добавление учителя в БД")
-
-    await student_exams.add_teacher(telegram_id=message.from_user.id)
-    logger.warning(f"Учитель с telegram_id={message.from_user.id} успешно добавлен в БД")
-
-
-async def add_students_to_db(students: list, form_exams: list[FormExam], telegram_id: int) -> None:
+async def add_students_to_db(students: list, form_exams: list[FormExam], telegram_id) -> None:
     """Функция для добавления студентов и экзаменов в БД."""
     logger.info(f"Добавление {len(students)} студентов и {len(form_exams)} экзаменов в БД")
+    logger.debug(f"telegram_id: {telegram_id}")
     await student_exams.add_students(students=students, form_exams=form_exams, telegram_id=telegram_id)
 
 
 async def parsing_logic(message: Message, user_data: Tuple) -> None:
+
+
+
+
     try:
         logger.info("command_prepare_exam activated")
         await message.answer("Начало парсинга сайта")
@@ -37,7 +34,6 @@ async def parsing_logic(message: Message, user_data: Tuple) -> None:
 
         # Запускаем парсинг в фоне
         students_task = asyncio.create_task(fetch_students(user_data))
-        teacher_task = asyncio.create_task(add_teacher_to_db(message))
 
         students = await students_task  # Ждём завершения парсинга
 
@@ -49,8 +45,6 @@ async def parsing_logic(message: Message, user_data: Tuple) -> None:
         logger.info(f"Успешно получено {len(students)} студентов из сайта.")
         await message.answer("Парсинг прошёл успешно")
 
-        await teacher_task  # Дожидаемся добавления учителя в БД
-        logger.info("Учитель успешно добавлен в БД")
 
         # Формирование вопросов – выполняется в основном потоке
         form_questions.students = students

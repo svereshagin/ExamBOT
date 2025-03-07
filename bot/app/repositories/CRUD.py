@@ -1,15 +1,11 @@
-import asyncio
 from typing import List, Sequence, Union
 from sqlalchemy import  Row
-
-
 from bot.app.logger.logger_file import logger
 from bot.app.repositories.models import Student, Exam, Teacher
 from bot.app.repositories.database import connection
 from bot.app.services.Exam.form_questions import FormExam
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
 
 class StudentExam:
     __instance = None
@@ -20,6 +16,47 @@ class StudentExam:
             return object.__new__(cls)
         else:
             raise Exception("This class is a singleton!")
+
+    @classmethod
+    @connection
+    async def add_teacher(cls, session: AsyncSession, telegram_id) -> dict:
+        """
+        Add a teacher to the database.
+        Args:
+            session:
+            telegram_id:
+
+        Returns:
+            dict {"success": True} if OK
+            dict {"success": False, "error": "Teacher with {teacher.telegram_id} already exists"}}
+        """
+        try:
+            logger.info(f"Adding teacher {telegram_id}")
+
+            # Проверка существующего учителя
+            stmt = select(Teacher).where(Teacher.telegram_id == telegram_id)
+            result = await session.execute(stmt)
+            teacher = result.scalar_one_or_none()
+
+            # Если учитель не найден
+            if not teacher:
+                new_teacher = Teacher(telegram_id=telegram_id)
+                session.add(new_teacher)
+                await session.commit()  # Фиксируем изменения
+                await session.refresh(new_teacher)  # Обновляем атрибуты (если нужно ID)
+                logger.debug(f"Created new teacher: {new_teacher.telegram_id}")
+                result = {"success": True}
+            else:
+                result = {"success": False, "error": f"Teacher with {teacher.telegram_id} already exists"}
+            logger.debug(f"Teacher already exists: {telegram_id}")
+            return result
+
+
+
+        except Exception as e:
+            logger.error(f"Error adding teacher: {e}")
+            await session.rollback()  # Откатываем транзакцию при ошибке
+            raise  # Пробрасываем исключение дальше
 
     @classmethod
     @connection
@@ -49,27 +86,6 @@ class StudentExam:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    @classmethod
-    @connection
-    async def add_teacher(cls, session: AsyncSession, telegram_id: int) -> dict:
-        """Добавляет учителя в базу данных по его Telegram ID."""
-        try:
-            # Проверяем, существует ли уже учитель с таким Telegram ID
-            stmt = select(Teacher).where(Teacher.telegram_id == telegram_id)
-            result = await session.execute(stmt)
-            teacher = result.scalar_one_or_none()
-            if teacher:
-                return {"success": False, "error": "Teacher already exists"}
-
-            # Создаем нового учителя
-            new_teacher = Teacher(telegram_id=telegram_id)
-            session.add(new_teacher)
-
-            await session.commit()  # Фиксируем изменения
-            return {"success": True, "teacher_id": new_teacher.id}
-        except Exception as e:
-            await session.rollback()  # Откатываем транзакцию в случае ошибки
-            return {"success": False, "error": str(e)}
 
 
     @classmethod
@@ -135,48 +151,34 @@ class StudentExam:
     async def add_students(
             cls, session: AsyncSession, telegram_id: int, students: List[str], form_exams: List[FormExam]
     ) -> dict:
-        print("create_students")
         try:
-            # Получаем учителя по telegram_id
-            stmt = select(Teacher).where(Teacher.telegram_id == telegram_id)
-            result = await session.execute(stmt)
-            teacher = result.scalar_one_or_none()
-
+            # Получаем учителя
+            teacher = await session.scalar(
+                select(Teacher).where(Teacher.telegram_id == telegram_id)
+            )
             if not teacher:
-                return {"success": False, "error": "Teacher not found"}
+                return {"error": "Teacher not found"}
 
-            for idx, student_name in enumerate(students):
-                if idx >= len(form_exams):
-                    break  # Если студентов больше, чем экзаменов, прекращаем цикл
-
-                # Создаем ученика, привязывая его к учителю
-                new_student = Student(
-                    surname=student_name,
-                    teacher_id=teacher.id  # Добавляем связь с учителем
-                )
-                session.add(new_student)
-                await session.flush()  # Обновляем сессию, чтобы получить ID нового студента
-
-                # Создаем экзамен для этого студента
+            # Создаем всех студентов и экзамены
+            students_and_exams = []
+            for student_name, exam_data in zip(students, form_exams):
+                student = Student(surname=student_name, teacher_id=teacher.id)
                 exam = Exam(
-                    turn=form_exams[idx].turn,
-                    examination_paper=form_exams[idx].examination_paper,
-                    tasks="\n".join(form_exams[idx].tasks),
-                    student_id=new_student.id,  # Привязываем к созданному студенту
+                    turn=exam_data.turn,
+                    examination_paper=exam_data.examination_paper,
+                    tasks="\n".join(exam_data.tasks),
+                    student=student  # Используем relationship вместо student_id
                 )
-                session.add(exam)
+                students_and_exams.extend([student, exam])
 
-            print("create_students2")
-            await session.commit()  # Коммитим все изменения сразу
-
-            # Проверка, добавились ли студенты
-            added_students = await session.execute(select(Student).where(Student.teacher_id == teacher.id))
-            logger.info(f"Добавлено студентов в БД: {len(added_students.scalars().all())}")
+            session.add_all(students_and_exams)
+            await session.commit()
 
             return {"success": True}
         except Exception as e:
-            await session.rollback()  # Откатить изменения в случае ошибки
-            return {"success": False, "error": str(e)}
+            await session.rollback()
+            logger.error(f"Error: {e}", exc_info=True)
+            return {"error": str(e)}
 
     @classmethod
     @connection

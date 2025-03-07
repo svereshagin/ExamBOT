@@ -8,7 +8,7 @@ readme = "README.md"
 
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = ">=3.11,<4.0" #was "3.10"
 sqlalchemy = "^2.0.38"
 greenlet = "^3.1.1"
 asyncpg = "^0.30.0"
@@ -24,12 +24,17 @@ uvicorn = "^0.34.0"
 chromedriver-binary = "^135.0.7039.0.0"
 pyyaml = "^6.0.2"
 alembic = "^1.14.1"
+async-timeout = "^5.0.1"
 
 
 [tool.poetry.group.dev.dependencies]
 black = "^25.1.0"
 pytest = "^8.3.4"
 pytest-asyncio = "^0.25.3"
+
+
+[tool.poetry.group.docs.dependencies]
+sphinx = "^7.2.6"
 
 [build-system]
 requires = ["poetry-core"]

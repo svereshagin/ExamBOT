@@ -1,13 +1,15 @@
 import asyncio
+from select import select
 from typing import List
 
 from aiogram import Bot, Router, F
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, KeyboardButton, ReplyKeyboardMarkup
+from sqlalchemy.orm import Session
 
 from bot.app.logger.logger_file import logger
-from bot.app.repositories.models import Student
+from bot.app.repositories.models import Student, Exam
 from bot.app.services.Exam.timer import ExamTimerPreparations
 from bot.app.text_for_handlers.timer_handler_text import (
     cmd_router_start_exam_text,
@@ -44,6 +46,12 @@ async def command_start_timer(message: Message, state: FSMContext):
     await log_and_respond(message, cmd_router_start_exam_text)
     await message.answer("⏳ Введите параметры таймера (например, '10 90'):")
     await state.set_state(TimerState.waiting_for_time)
+
+
+
+
+
+
 
 
 
@@ -117,9 +125,9 @@ async def send_preparation_messages(chat_id: int, preparation_time: int, bot: Bo
 
 
 async def send_exam_messages(
-    chat_id: int, students: List[Student], student_time: int, bot: Bot
+        chat_id: int, students: List[Student], student_time: int, bot: Bot, db_session: Session
 ):
-    """Процесс экзамена для каждого студента"""
+    """Процесс экзамена для каждого студента с установкой оценки через клавиатуру"""
     for student in students:
         if chat_id not in active_timers:
             return
@@ -137,8 +145,8 @@ async def send_exam_messages(
         finally:
             student_skip_event[chat_id].clear()
 
+        # Сообщение об окончании времени для студента
         await bot.send_message(chat_id, f"🚀 Время для {student.surname} вышло!")
-
 
 @router.message(TimerState.exam_in_progress)
 async def skip_current_student(message: Message):
@@ -147,6 +155,7 @@ async def skip_current_student(message: Message):
     if chat_id in student_skip_event:
         student_skip_event[chat_id].set()
         await message.answer("⏭ Студент пропущен! Переходим к следующему.")
+
 
 
 @router.message(F.text == "/stop_exam")

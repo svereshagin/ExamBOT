@@ -7,6 +7,7 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message
 from bot.app.keyboards.Keyboard_Manager import Menu
 from bot.app.logger.logger_file import logger
+from bot.app.repositories.CRUD import student_exams
 from bot.app.services.selenium_parser.parsing_logic_aiogram import parsing_logic
 from bot.app.utilities.delete_msg import delete_message_later
 
@@ -30,10 +31,10 @@ async def process_login(message: Message, state: FSMContext) -> None:
 
     await state.set_state(PrepareExam.password)
 
-
 @router.message(PrepareExam.password)
 async def process_password(message: Message, state: FSMContext) -> None:
     await state.update_data(password=message.text)
+    await student_exams.add_teacher(telegram_id= message.from_user.id)
     response = await message.answer(f"Введён пароль: {message.text}")
     asyncio.create_task(delete_message_later(response))
     asyncio.create_task(delete_message_later(message, delay=60))

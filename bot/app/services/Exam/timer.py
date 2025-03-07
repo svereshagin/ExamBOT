@@ -3,16 +3,17 @@ from typing import Optional, Tuple, List
 
 
 class ExamTimerPreparations:
-    def __init__(
-        self,
-        mode1: Optional[Tuple[int, int]] = None,
-        mode2: Optional[Tuple[int, int]] = None,
-    ):
-        """
-        Инициализирует параметры экзамена.
+    """
+    Инициализирует параметры экзамена.
 
-        :param mode1: Кортеж, содержащий время на подготовку и общее время экзамена.
-        :param mode2: Кортеж, содержащий время на подготовку и время на одного студента.
+    :param mode1: Кортеж, содержащий время на подготовку и общее время экзамена.
+    :param mode2: Кортеж, содержащий время на подготовку и время на одного студента.
+
+    Пример использования:
+
+    .. code-block:: python
+
+        import asyncio
 
         async def main():
             s = ExamTimerPreparations(mode1=(15, 120))
@@ -20,8 +21,14 @@ class ExamTimerPreparations:
             print(result_text)  # Выводим текст
             print(result_data)  # Выводим дополнительные данные
             # Запуск асинхронного кода
+
         asyncio.run(main())
-        """
+    """
+    def __init__(
+        self,
+        mode1: Optional[Tuple[int, int]] = None,
+        mode2: Optional[Tuple[int, int]] = None,
+    ):
         self.preparation_time: Optional[int] = None
         self.exam_time: Optional[int] = None
         self.time_per_student: Optional[int] = None
