@@ -12,5 +12,3 @@ chrome_options.add_argument(
 driver = webdriver.Chrome(
     service=Service(ChromeDriverManager().install()), options=chrome_options
 )
-
-

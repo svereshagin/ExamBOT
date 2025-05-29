@@ -3,8 +3,6 @@ import yaml
 from bot.app.logger.logger_file import logger
 
 
-
-
 base_path_to_links = (
     Path(__file__).parent.parent.parent.joinpath("yml_files").joinpath("links.yml")
 )
